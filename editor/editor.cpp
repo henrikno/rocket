@@ -59,6 +59,7 @@ HWND hwnd = NULL;
 TrackView *trackView = NULL;
 HWND trackViewWin = NULL;
 HWND statusBarWin = NULL;
+HWND tabBarWin = NULL;
 SyncDocument document;
 HKEY regConfigKey = NULL;
 RecentFiles mruFileList(NULL);
@@ -330,6 +331,27 @@ static HWND createStatusBar(HINSTANCE hInstance, HWND hpwnd)
 	return hwnd;
 }
 
+static HWND createTabBar(HINSTANCE hInstance, HWND hpwnd)
+{
+	HWND hwnd = CreateWindow(
+		WC_TABCONTROL,                   // tab control
+		NULL,                            // no text
+		WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE, // styles
+		0, 0, 0, 0,                      // x, y, cx, cy
+		hpwnd,                           // parent window
+		NULL,                            // menu
+		hInstance,                       // instance
+		NULL                             // window data
+	);
+
+	TCITEM item;
+	item.mask = TCIF_TEXT;
+	item.pszText = "default";
+	TabCtrl_InsertItem(hwnd, 0, &item);
+
+	return hwnd;
+}
+
 static LRESULT CALLBACK mainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch(msg)
@@ -338,6 +360,7 @@ static LRESULT CALLBACK mainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
 		{
 			trackViewWin = trackView->create(hInst, hwnd);
 			InitCommonControls();
+			tabBarWin = createTabBar(hInst, hwnd);
 			statusBarWin = createStatusBar(hInst, hwnd);
 
 			if (ERROR_SUCCESS != RegOpenKey(HKEY_CURRENT_USER, keyName, &regConfigKey))
@@ -368,12 +391,19 @@ static LRESULT CALLBACK mainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
 			int width  = LOWORD(lParam);
 			int height = HIWORD(lParam);
 			
-			RECT statusBarRect;
+			RECT statusBarRect, tabBarRect;
 			GetClientRect(statusBarWin, &statusBarRect);
+			GetClientRect(hwnd, &tabBarRect);
+/*			TabCtrl_GetItemRect(tabBarWin, 0, &tabBarRect); */
+			TabCtrl_AdjustRect(tabBarWin, FALSE, &tabBarRect);
 			int statusBarHeight = statusBarRect.bottom - statusBarRect.top;
-			
-			MoveWindow(trackViewWin, 0, 0, width, height - statusBarHeight, TRUE);
+			int tabBarHeight = tabBarRect.top;
+
+			MoveWindow(tabBarWin, 0, 0, width, tabBarHeight, TRUE);
+			MoveWindow(trackViewWin, 0, tabBarHeight, width, height - statusBarHeight - tabBarHeight, TRUE);
 			MoveWindow(statusBarWin, 0, height - statusBarHeight, width, statusBarHeight, TRUE);
+
+			SetActiveWindow(trackViewWin);
 		}
 		break;
 	
@@ -388,7 +418,15 @@ static LRESULT CALLBACK mainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
 	case WM_BIASSELECTION:
 		trackView->editBiasValue(float(lParam));
 		break;
-	
+
+	case WM_NOTIFY:
+		if (((LPNMHDR)lParam)->code == TCN_SELCHANGE) {
+			int page = TabCtrl_GetCurSel(tabBarWin);
+			document.setTrackGroup(page);
+			InvalidateRect(trackViewWin, NULL, FALSE);
+		}
+		break;
+
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
