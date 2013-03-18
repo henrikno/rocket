@@ -20,20 +20,13 @@ signals:
     void clientConnected(const QHostAddress &hostAddress);
 
 public slots:
-    void update();
-
     void acceptConnection();
-    void startRead();
-    void processCommands();
-    //void SendKey(std::string name, SyncKey key);
     void ChangeRow(int row);
     void cellChanged(std::string track, SyncKey key);
     void interpolationTypeChanged(std::string track, SyncKey key2);
     void SendPause();
     void keyDeleted(std::string, SyncKey key);
     void sendExportCommand();
-
-    //bool recv(char *buffer, size_t length, int flags);
 
 private:
     MainWindow *mainWindow;

@@ -67,13 +67,6 @@ public:
 		return true;
 	}
 
-	bool pollRead()
-	{
-		if (!connected())
-			return false;
-		return socket->bytesAvailable() > 0;
-	}
-
 	void sendSetKeyCommand(const std::string &trackName, const struct track_key &key);
 	void sendDeleteKeyCommand(const std::string &trackName, int row);
 	void sendSetRowCommand(int row);

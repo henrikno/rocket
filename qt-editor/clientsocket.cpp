@@ -3,7 +3,6 @@
 #include "TrackView.h"
 #include "MainWindow.h"
 
-
 #include <cassert>
 #include <string>
 #include <iostream>
@@ -127,7 +126,7 @@ void ClientSocket::readMessage()
                                 state = CLIENT_SET_ROW;
                                 break;
                             default:
-                                std::cout << "Unknown command" << cmd << endl;
+                                std::cout << "Unknown command" << cmd << std::endl;
                                 break;
                         }
                     }
@@ -206,7 +205,6 @@ void ClientSocket::readMessage()
             if (socket->bytesAvailable() >= sizeof(newRow)) {
                 recv((char*)&newRow, sizeof(newRow));
                 newRow = ntohl(newRow);
-//			trackView->setEditRow(ntohl(newRow));
                 emit rowChanged(newRow);
                 state = READY;
             } else {
@@ -219,8 +217,6 @@ void ClientSocket::readMessage()
             std::cout << "Unknown state" << std::endl;
         }
     }
-
-
 }
 
 void ClientSocket::onDisconnected()
