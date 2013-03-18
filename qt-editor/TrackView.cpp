@@ -42,8 +42,8 @@ void TrackView::keyPressEvent(QKeyEvent *event)
         QItemSelectionModel *selection = selectionModel();
         QModelIndex index = selection->currentIndex();
         trackModel->ChangeInterpolationType(index);
-//        SyncKey key = trackModel->GetPrevKey(index);
-//        emit interpolationTypeChanged(trackModel->GetTrackName(index.column()), key);
+        SyncKey key = trackModel->GetPrevKey(index);
+        emit interpolationTypeChanged(trackModel->GetTrackName(index.column()), key);
         this->update(index);
         this->viewport()->update();
         repaint();

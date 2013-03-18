@@ -8,13 +8,6 @@
 #include "clientsocket.h"
 class MainWindow;
 
-enum ClientState {
-    WAITING,
-    VERIFYING,
-    READY,
-    STATE_ERROR
-};
-
 class ServerWrapper : public QObject
 {
     Q_OBJECT
@@ -42,16 +35,13 @@ public slots:
 
     //bool recv(char *buffer, size_t length, int flags);
 
-
 private:
     MainWindow *mainWindow;
     QTcpServer *server;
-//    QTcpSocket *client;
     int isClientPaused;
-    ClientState client_state;
-    //int socket;
+
     int clientIndex;
-    ClientSocket clientSocket;
+    ClientSocket *clientSocket;
 };
 
 #endif // SERVERWRAPPER_H

@@ -29,10 +29,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(trackView, SIGNAL(interpolationTypeChanged(std::string,SyncKey)), serverWrapper, SLOT(interpolationTypeChanged(std::string,SyncKey)));
     connect(trackView, SIGNAL(pauseTriggered()), serverWrapper, SLOT(SendPause()));
     connect(trackView, SIGNAL(deleteKey(std::string,SyncKey)), serverWrapper, SLOT(keyDeleted(std::string,SyncKey)));
-
-    QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), serverWrapper, SLOT(update()));
-    timer->start(16);
 }
 
 void MainWindow::SetStatusMessage(QString msg) {

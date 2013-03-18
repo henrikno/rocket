@@ -15,28 +15,15 @@
 
 const int SYNC_PORT = 1338;
 
-bool clientConnect(QAbstractSocket *clientSocket)
-{
-    const char *expectedGreeting = CLIENT_GREET;
-    char recievedGreeting[128];
-
-    clientSocket->read(recievedGreeting, strlen(expectedGreeting));
-    if (strncmp(expectedGreeting, recievedGreeting, strlen(expectedGreeting)) != 0)
-        return false;
-    std::cout << "Greeting was ok" << std::endl;
-
-    const char *greeting = SERVER_GREET;
-    clientSocket->write(greeting, strlen(greeting));
-    return true;
-}
-
 ServerWrapper::ServerWrapper(MainWindow *parent) :
     QObject((QObject*)parent), mainWindow(parent)
 {
     isClientPaused = true;
     server = new QTcpServer(this);
     if (!server->listen(QHostAddress::Any, SYNC_PORT))
-        throw std::runtime_error("Coult not listen on port");
+        throw std::runtime_error("Could not listen on port");
+    std::cout << "Listening on port " << SYNC_PORT << std::endl;
+    connect(server, SIGNAL(newConnection()), this, SLOT(acceptConnection()));
 }
 
 ServerWrapper::~ServerWrapper() {
@@ -44,7 +31,8 @@ ServerWrapper::~ServerWrapper() {
 
 void ServerWrapper::update()
 {
-    if (clientSocket.connected()) {
+    std::cout << "Update" << std::endl;
+    if (clientSocket->connected()) {
         startRead();
     } else {
         acceptConnection();
@@ -53,17 +41,14 @@ void ServerWrapper::update()
 
 void ServerWrapper::acceptConnection()
 {
+    std::cout << "acceptConnection" << std::endl;
     if (server->hasPendingConnections()) {
         QTcpSocket *clientSocket = server->nextPendingConnection();
-        if (clientConnect(clientSocket)) {
-            clientIndex = 0;
-            this->clientSocket = ClientSocket(clientSocket);
+        this->clientSocket = new ClientSocket(clientSocket, mainWindow);
+        connect(this->clientSocket, SIGNAL(rowChanged(int)), this, SIGNAL(rowChanged(int)));
+        connect(this->clientSocket, SIGNAL(clientConnected(const QHostAddress &)), this, SIGNAL(clientConnected(const QHostAddress &)));
 
-            this->clientSocket.sendPauseCommand(true);
-            isClientPaused = true;
-
-            emit clientConnected(clientSocket->peerAddress());
-        }
+        isClientPaused = true;
     }
 }
 
@@ -71,7 +56,7 @@ void ServerWrapper::startRead() {
 
     //std::cout << "startRead ..." << std::endl;
 
-    while (this->clientSocket.pollRead())
+    while (this->clientSocket->pollRead())
         processCommands();
 
     return;
@@ -82,27 +67,29 @@ void ServerWrapper::processCommands()
     int strLen, serverIndex, newRow;
     std::string trackName;
     unsigned char cmd = 0;
-    if (clientSocket.recv((char*)&cmd, 1)) {
+    if (clientSocket->recv((char*)&cmd, 1)) {
         std::cout << "Cmd: " << (int)cmd << std::endl;
         switch (cmd) {
         case GET_TRACK:
             {
             // Get index
             uint32_t index;
-            if (!clientSocket.recv((char*)&index, sizeof(index)))
+            if (!clientSocket->recv((char*)&index, sizeof(index))) {
+                std::cerr << "Error" << std::endl;
                 return;
+            }
             std::cout << "Index: " << index << std::endl;
 
             // Get track string length
-            clientSocket.recv((char *)&strLen, sizeof(int));
+            clientSocket->recv((char *)&strLen, sizeof(int));
             strLen = ntohl(strLen);
             std::cout << "Strlen: " << strLen << std::endl;
-            if (!clientSocket.connected())
+            if (!clientSocket->connected())
                 return;
 
             // Get track string
             trackName.resize(strLen);
-            if (!clientSocket.recv(&trackName[0], strLen))
+            if (!clientSocket->recv(&trackName[0], strLen))
                 return;
             std::cout << "TrackName: " << trackName << std::endl;
 
@@ -113,7 +100,7 @@ void ServerWrapper::processCommands()
                 track = trackView->getTrack(trackName);
             }
 
-            clientSocket.clientTracks[trackName] = clientIndex++;
+            clientSocket->clientTracks[trackName] = clientIndex++;
 
             SyncTrack::iterator it = track->begin();
             for (; it != track->end(); it++) {
@@ -122,14 +109,14 @@ void ServerWrapper::processCommands()
                 key.value = it->second.value;
                 key.type = (key_type)it->second.type;
 
-                clientSocket.sendSetKeyCommand(trackName, key);
+                clientSocket->sendSetKeyCommand(trackName, key);
                 //SendKey(track->GetName(), it->second);
             }
 
             }
             break;
         case SET_ROW:
-            clientSocket.recv((char*)&newRow, sizeof(newRow));
+            clientSocket->recv((char*)&newRow, sizeof(newRow));
             newRow = ntohl(newRow);
 //			trackView->setEditRow(ntohl(newRow));
             emit rowChanged(newRow);
@@ -164,7 +151,7 @@ void ServerWrapper::SendKey(std::string name, SyncKey key) {
 void ServerWrapper::ChangeRow(int row)
 {
     if (isClientPaused) {
-        clientSocket.sendSetRowCommand(row);
+        clientSocket->sendSetRowCommand(row);
     }
 }
 
@@ -175,7 +162,7 @@ void ServerWrapper::cellChanged(std::string track, SyncKey key2)
     key.row = key2.row;
     key.value = key2.value;
     key.type = (key_type)key2.type;
-    clientSocket.sendSetKeyCommand(track, key);
+    clientSocket->sendSetKeyCommand(track, key);
 }
 
 void ServerWrapper::interpolationTypeChanged(std::string track, SyncKey key2)
@@ -184,21 +171,21 @@ void ServerWrapper::interpolationTypeChanged(std::string track, SyncKey key2)
     key.row = key2.row;
     key.value = key2.value;
     key.type = (key_type)key2.type;
-    clientSocket.sendSetKeyCommand(track, key);
+    clientSocket->sendSetKeyCommand(track, key);
 }
 
 void ServerWrapper::SendPause()
 {
-    clientSocket.sendPauseCommand(!isClientPaused);
+    clientSocket->sendPauseCommand(!isClientPaused);
     isClientPaused = !isClientPaused;
 }
 
 void ServerWrapper::keyDeleted(std::string track, SyncKey key)
 {
-    clientSocket.sendDeleteKeyCommand(track, key.row);
+    clientSocket->sendDeleteKeyCommand(track, key.row);
 }
 
 void ServerWrapper::sendExportCommand()
 {
-    clientSocket.sendSaveCommand();
+    clientSocket->sendSaveCommand();
 }
