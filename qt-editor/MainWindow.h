@@ -19,11 +19,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void SendKey(std::string name, SyncKey key);
-    void SetStatusMessage(QString msg);
+    void sendKey(std::string name, SyncKey key);
+    void setStatusMessage(QString msg);
 public slots:
-    void OpenFile();
-    void RunExport();
+    void openFile();
+    void runExport();
     void onClientConnected(const QHostAddress &hostAddress);
 
 public:

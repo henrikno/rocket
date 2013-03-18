@@ -48,7 +48,7 @@ SyncTrack::SyncTrack(std::string name)
 {
 }
 
-SyncKey SyncTrack::GetPrevKey(int row)
+SyncKey SyncTrack::getPrevKey(int row)
 {
     assert(keys.size() != 0);
 
@@ -66,7 +66,7 @@ SyncKey SyncTrack::GetPrevKey(int row)
     return it->second;
 }
 
-SyncKey SyncTrack::GetExactKey(int row)
+SyncKey SyncTrack::getExactKey(int row)
 {
     assert(keys.size() != 0);
     assert(keys.count(row) == 1);
@@ -74,7 +74,7 @@ SyncKey SyncTrack::GetExactKey(int row)
 }
 
 
-float SyncTrack::GetValue(double row) {
+float SyncTrack::getValue(double row) {
     if (keys.size() == 0)
         return 0.0;
     int irow = (int)floor(row);
@@ -113,13 +113,13 @@ float SyncTrack::GetValue(double row) {
     return 0.0f;
 }
 
-void SyncTrack::SetKey(SyncKey key)
+void SyncTrack::setKey(SyncKey key)
 {
     //std::cout << "val: " << key.value << std::endl;
     keys[key.row] = key;
 }
 
-void SyncTrack::DelKey(int row)
+void SyncTrack::delKey(int row)
 {
     SyncTrack::iterator it = keys.find(row);
     if (it != keys.end()) {
@@ -128,7 +128,7 @@ void SyncTrack::DelKey(int row)
     }
 }
 
-void SyncTrack::LoadFromFile(std::string base) {
+void SyncTrack::loadFromFile(std::string base) {
     FILE *fp = fopen("sync.track", "rb");
     if (!fp)
         assert(0);
@@ -148,18 +148,18 @@ void SyncTrack::LoadFromFile(std::string base) {
 }
 
 
-bool SyncTrack::IsKeyFrame(int row)
+bool SyncTrack::isKeyFrame(int row)
 {
     if (keys.find(row) != keys.end())
         return true;
     return false;
 }
 
-std::string SyncTrack::GetName()
+std::string SyncTrack::getName()
 {
     return name;
 }
 
-std::map<int,SyncKey> SyncTrack::GetKeyMap() {
+std::map<int,SyncKey> SyncTrack::getKeyMap() {
     return keys;
 }

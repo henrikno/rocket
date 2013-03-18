@@ -30,7 +30,7 @@ public:
     int getTrackIndex(std::string name);
     void createTrack(std::string name);
 
-    int GetCurrentRow();
+    int getCurrentRow();
 signals:
     void rowChanged(int row);
     void cellChanged(std::string column, SyncKey key);
@@ -39,7 +39,7 @@ signals:
     void pauseTriggered();
 
 public slots:
-    void ChangeRow(int row);
+    void changeRow(int row);
 
 protected:
 

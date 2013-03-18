@@ -21,23 +21,22 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 
-    void ChangeInterpolationType(const QModelIndex &index);
+    void changeInterpolationType(const QModelIndex &index);
 
     void createTrack(std::string name);
     SyncTrack* getTrack(std::string name);
-    SyncTrack* GetTrackByColumn(int column);
+    SyncTrack* getTrackByColumn(int column);
     int getTrackIndex(std::string name);
 
-    bool HasTrack(std::string name);
-    std::string GetTrackName(int column);
-    SyncKey GetPrevKey(const QModelIndex &index);
-    SyncKey GetExactKey(const QModelIndex &index);
-    bool IsKeyFrame(const QModelIndex &index);
-    void DeleteKey(const QModelIndex &index);
+    bool hasTrack(std::string name);
+    std::string getTrackName(int column);
+    SyncKey getPrevKey(const QModelIndex &index);
+    SyncKey getExactKey(const QModelIndex &index);
+    bool isKeyFrame(const QModelIndex &index);
+    void deleteKey(const QModelIndex &index);
 
 signals:
     void cellChanged(std::string column, SyncKey key);
-
 
 private:
     std::vector<SyncTrack*> tracks;

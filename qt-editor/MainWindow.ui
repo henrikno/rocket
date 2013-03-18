@@ -95,7 +95,7 @@
    <sender>actionOpen_file</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>OpenFile()</slot>
+   <slot>openFile()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -111,7 +111,7 @@
    <sender>actionExport</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>RunExport()</slot>
+   <slot>runExport()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>156</x>
@@ -125,7 +125,7 @@
   </connection>
  </connections>
  <slots>
-  <slot>RunExport()</slot>
-  <slot>OpenFile()</slot>
+  <slot>runExport()</slot>
+  <slot>openFile()</slot>
  </slots>
 </ui>

@@ -18,20 +18,20 @@ MainWindow::MainWindow(QWidget *parent) :
     trackView = new TrackView(this);
     setCentralWidget(trackView);
 
-    SetStatusMessage("Not connected");
+    setStatusMessage("Not connected");
 
     serverWrapper = new ServerWrapper(this);
 
-    connect(trackView, SIGNAL(rowChanged(int)), serverWrapper, SLOT(ChangeRow(int)));
-    connect(serverWrapper, SIGNAL(rowChanged(int)), trackView, SLOT(ChangeRow(int)));
+    connect(trackView, SIGNAL(rowChanged(int)), serverWrapper, SLOT(changeRow(int)));
+    connect(serverWrapper, SIGNAL(rowChanged(int)), trackView, SLOT(changeRow(int)));
     connect(serverWrapper, SIGNAL(clientConnected(const QHostAddress &)), this, SLOT(onClientConnected(const QHostAddress &)));
     connect(trackView, SIGNAL(cellChanged(std::string,SyncKey)), serverWrapper, SLOT(cellChanged(std::string,SyncKey)));
     connect(trackView, SIGNAL(interpolationTypeChanged(std::string,SyncKey)), serverWrapper, SLOT(interpolationTypeChanged(std::string,SyncKey)));
-    connect(trackView, SIGNAL(pauseTriggered()), serverWrapper, SLOT(SendPause()));
+    connect(trackView, SIGNAL(pauseTriggered()), serverWrapper, SLOT(sendPause()));
     connect(trackView, SIGNAL(deleteKey(std::string,SyncKey)), serverWrapper, SLOT(keyDeleted(std::string,SyncKey)));
 }
 
-void MainWindow::SetStatusMessage(QString msg) {
+void MainWindow::setStatusMessage(QString msg) {
     ui->statusBar->showMessage(msg);
 }
 
@@ -43,11 +43,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::onClientConnected(const QHostAddress &hostAddress)
 {
-    SetStatusMessage(QString("Connected to ") + hostAddress.toString());
-    serverWrapper->ChangeRow(trackView->GetCurrentRow());
+    setStatusMessage(QString("Connected to ") + hostAddress.toString());
+    serverWrapper->changeRow(trackView->getCurrentRow());
 }
 
-void MainWindow::OpenFile()
+void MainWindow::openFile()
 {
     QString path = QFileDialog::getOpenFileName(this, tr("Directory"));
     if (path.isNull() == false)
@@ -56,7 +56,7 @@ void MainWindow::OpenFile()
     }
 }
 
-void MainWindow::RunExport()
+void MainWindow::runExport()
 {
     serverWrapper->sendExportCommand();
 }

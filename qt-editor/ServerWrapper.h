@@ -21,10 +21,10 @@ signals:
 
 public slots:
     void acceptConnection();
-    void ChangeRow(int row);
+    void changeRow(int row);
     void cellChanged(std::string track, SyncKey key);
     void interpolationTypeChanged(std::string track, SyncKey key2);
-    void SendPause();
+    void sendPause();
     void keyDeleted(std::string, SyncKey key);
     void sendExportCommand();
 

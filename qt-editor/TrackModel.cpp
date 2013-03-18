@@ -41,13 +41,13 @@ QVariant TrackModel::data(const QModelIndex &index, int role) const
     QVariant var(QVariant::Double);
     switch (role) {
     case Qt::DisplayRole:
-        if (track->IsKeyFrame(index.row()))
-            return str.setNum(track->GetValue(index.row()));
+        if (track->isKeyFrame(index.row()))
+            return str.setNum(track->getValue(index.row()));
         return QVariant("---");
 
     case Qt::BackgroundRole:
-        if (track->GetKeyMap().size() && index.row() >= track->GetKeyMap().begin()->first) {
-            if (track->GetPrevKey(index.row()).type == SyncKey::LINEAR)
+        if (track->getKeyMap().size() && index.row() >= track->getKeyMap().begin()->first) {
+            if (track->getPrevKey(index.row()).type == SyncKey::LINEAR)
                 return QBrush(QColor(0, 255, 0, 16));
         }
 
@@ -56,14 +56,14 @@ QVariant TrackModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     case Qt::EditRole:
-        if (track->IsKeyFrame(index.row())) {
-            var.setValue(track->GetValue(index.row()));
+        if (track->isKeyFrame(index.row())) {
+            var.setValue(track->getValue(index.row()));
             return var.toDouble();
         }
         return QVariant(QVariant::Double);
 
     case Qt::TextColorRole:
-        if (track->IsKeyFrame(index.row())) {
+        if (track->isKeyFrame(index.row())) {
             return QBrush(QColor(0, 0, 0, 255));
         }
         return QBrush(QColor(64, 64, 64, 32));
@@ -84,9 +84,9 @@ bool TrackModel::setData(const QModelIndex &index, const QVariant &value, int ro
     key.row = index.row();
     key.type = SyncKey::STEP;
     key.value = value.toFloat();
-    tracks[index.column()]->SetKey(key);
+    tracks[index.column()]->setKey(key);
 
-    emit cellChanged(tracks[index.column()]->GetName(), key);
+    emit cellChanged(tracks[index.column()]->getName(), key);
 
     dataChanged(index, index);
     return true;
@@ -100,8 +100,7 @@ QVariant TrackModel::headerData(int section,
     if (role == Qt::DisplayRole) {
         if (orientation == Qt::Horizontal) {
             if (section >= tracks.size()) return QVariant();
-            return QVariant(QString(tracks[section]->GetName().c_str()));
-//            return QVariant(QString("header %1").arg(section));
+            return QVariant(QString(tracks[section]->getName().c_str()));
         }
         else
             return QVariant(QString("%1").arg(section, 4, 16, QLatin1Char('0')));
@@ -113,58 +112,57 @@ QVariant TrackModel::headerData(int section,
     return QVariant();
 }
 
-SyncKey TrackModel::GetPrevKey(const QModelIndex &index) {
+SyncKey TrackModel::getPrevKey(const QModelIndex &index) {
     SyncKey key = {};
     if (index.column() >= tracks.size()) return key;
 
-    return tracks[index.column()]->GetPrevKey(index.row());
+    return tracks[index.column()]->getPrevKey(index.row());
 }
 
-SyncKey TrackModel::GetExactKey(const QModelIndex &index) {
+SyncKey TrackModel::getExactKey(const QModelIndex &index) {
     SyncKey key = {};
     if (index.column() >= tracks.size()) return key;
 
-    return tracks[index.column()]->GetExactKey(index.row());
+    return tracks[index.column()]->getExactKey(index.row());
 }
 
-bool TrackModel::IsKeyFrame(const QModelIndex &index)
+bool TrackModel::isKeyFrame(const QModelIndex &index)
 {
     if (index.column() >= tracks.size())
         return false;
 
-    return tracks[index.column()]->IsKeyFrame(index.row());
+    return tracks[index.column()]->isKeyFrame(index.row());
 }
 
-void TrackModel::DeleteKey(const QModelIndex &index)
+void TrackModel::deleteKey(const QModelIndex &index)
 {
-    tracks[index.column()]->DelKey(index.row());
+    tracks[index.column()]->delKey(index.row());
     dataChanged(index, index);
 }
 
-void TrackModel::ChangeInterpolationType(const QModelIndex &index)
+void TrackModel::changeInterpolationType(const QModelIndex &index)
 {
-    if (index.column() >= tracks.size() || !tracks[index.column()]->GetKeyMap().size())
+    if (index.column() >= tracks.size() || !tracks[index.column()]->getKeyMap().size())
         return;
 
-    SyncKey key = tracks[index.column()]->GetPrevKey(index.row());
+    SyncKey key = tracks[index.column()]->getPrevKey(index.row());
     key.type = static_cast<SyncKey::Type>((key.type+1)%4);
 
-    tracks[index.column()]->SetKey(key);
+    tracks[index.column()]->setKey(key);
 
 }
 
-bool TrackModel::HasTrack(std::string name) {
-    for (int i = 0; i < tracks.size(); ++i) {
-        if (tracks[i]->GetName() == name) {
+bool TrackModel::hasTrack(std::string name) {
+    for (size_t i = 0; i < tracks.size(); ++i) {
+        if (tracks[i]->getName() == name) {
             return true;
         }
     }
-    return false;
-}
+    return false;}
 
 void TrackModel::createTrack(std::string name)
 {
-    bool found = HasTrack(name);
+    bool found = hasTrack(name);
     if (found) return;
 
     int n = tracks.size();
@@ -176,8 +174,8 @@ void TrackModel::createTrack(std::string name)
 
 SyncTrack * TrackModel::getTrack(std::string name)
 {
-    for (int i = 0; i < tracks.size(); ++i) {
-        if (tracks[i]->GetName() == name) {
+    for (size_t i = 0; i < tracks.size(); ++i) {
+        if (tracks[i]->getName() == name) {
             return tracks[i];
         }
     }
@@ -186,17 +184,17 @@ SyncTrack * TrackModel::getTrack(std::string name)
 
 int TrackModel::getTrackIndex(std::string name)
 {
-    for (int i = 0; i < tracks.size(); ++i) {
-        if (tracks[i]->GetName() == name) {
+    for (size_t i = 0; i < tracks.size(); ++i) {
+        if (tracks[i]->getName() == name) {
             return columnOrder[i];
         }
     }
     return -1;
 }
 
-std::string TrackModel::GetTrackName(int column)
+std::string TrackModel::getTrackName(int column)
 {
     if (column >= tracks.size()) return "";
-    return tracks[column]->GetName();
+    return tracks[column]->getName();
 }
 

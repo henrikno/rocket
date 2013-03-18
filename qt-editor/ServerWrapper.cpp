@@ -42,7 +42,7 @@ void ServerWrapper::acceptConnection()
     }
 }
 
-void ServerWrapper::ChangeRow(int row)
+void ServerWrapper::changeRow(int row)
 {
     if (isClientPaused) {
         clientSocket->sendSetRowCommand(row);
@@ -68,7 +68,7 @@ void ServerWrapper::interpolationTypeChanged(std::string track, SyncKey key2)
     clientSocket->sendSetKeyCommand(track, key);
 }
 
-void ServerWrapper::SendPause()
+void ServerWrapper::sendPause()
 {
     clientSocket->sendPauseCommand(!isClientPaused);
     isClientPaused = !isClientPaused;

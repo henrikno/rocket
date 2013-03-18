@@ -46,19 +46,19 @@ class SyncTrack {
 public:
     SyncTrack(std::string name);
 
-    std::string GetName();
+    std::string getName();
 
-    float GetValue(double row);
+    float getValue(double row);
 
-    SyncKey GetPrevKey(int row);
-    SyncKey GetExactKey(int row);
-    void SetKey(SyncKey key);
-    void DelKey(int row);
-    bool IsKeyFrame(int row);
+    SyncKey getPrevKey(int row);
+    SyncKey getExactKey(int row);
+    void setKey(SyncKey key);
+    void delKey(int row);
+    bool isKeyFrame(int row);
 
-    void LoadFromFile(std::string path);
+    void loadFromFile(std::string path);
 
-    std::map<int,SyncKey> GetKeyMap();
+    std::map<int,SyncKey> getKeyMap();
 
     // Iterator
     typedef std::map<int,SyncKey>::iterator iterator;

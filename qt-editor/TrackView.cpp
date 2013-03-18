@@ -29,7 +29,7 @@ TrackView::TrackView(QWidget *parent)
     connect(trackModel, SIGNAL(cellChanged(std::string,SyncKey)), this, SIGNAL(cellChanged(std::string,SyncKey)));
 }
 
-int TrackView::GetCurrentRow() {
+int TrackView::getCurrentRow() {
     QItemSelectionModel *selection = selectionModel();
     QModelIndex index = selection->currentIndex();
     return index.row();
@@ -41,9 +41,9 @@ void TrackView::keyPressEvent(QKeyEvent *event)
         // Change interpolation mode
         QItemSelectionModel *selection = selectionModel();
         QModelIndex index = selection->currentIndex();
-        trackModel->ChangeInterpolationType(index);
-        SyncKey key = trackModel->GetPrevKey(index);
-        emit interpolationTypeChanged(trackModel->GetTrackName(index.column()), key);
+        trackModel->changeInterpolationType(index);
+        SyncKey key = trackModel->getPrevKey(index);
+        emit interpolationTypeChanged(trackModel->getTrackName(index.column()), key);
         this->update(index);
         this->viewport()->update();
         repaint();
@@ -53,10 +53,10 @@ void TrackView::keyPressEvent(QKeyEvent *event)
     } else if (event->key() == Qt::Key_Delete) {
         QItemSelectionModel *selection = selectionModel();
         QModelIndex index = selection->currentIndex();
-        if (trackModel->IsKeyFrame(index)) {
-            SyncKey key = trackModel->GetExactKey(index);
-            trackModel->DeleteKey(index);
-            emit deleteKey(trackModel->GetTrackName(index.column()), key);
+        if (trackModel->isKeyFrame(index)) {
+            SyncKey key = trackModel->getExactKey(index);
+            trackModel->deleteKey(index);
+            emit deleteKey(trackModel->getTrackName(index.column()), key);
         }
     } else {
         QTableView::keyPressEvent(event);
@@ -91,7 +91,7 @@ void TrackView::currentChanged(const QModelIndex &current, const QModelIndex &pr
     emit rowChanged(current.row());
 }
 
-void TrackView::ChangeRow(int row)
+void TrackView::changeRow(int row)
 {
     setSelectionBehavior(QAbstractItemView::SelectItems);
     setSelectionMode(QAbstractItemView::SingleSelection);
